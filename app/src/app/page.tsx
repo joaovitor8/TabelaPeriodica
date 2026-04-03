@@ -1,8 +1,9 @@
-
-
+import PeriodicTable from '../components/PeriodicTable';
 
 export default function Home() {
   return (
-    <div></div>
+    <main>
+      <PeriodicTable />
+    </main>
   );
 }
