@@ -1,26 +1,143 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --bg-core: #040704;
+  --panel-glass: rgba(10, 20, 10, 0.6);
+  --toxic-primary: #39ff14;
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --color-toxic: var(--toxic-primary);
+  --color-core: var(--bg-core);
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background-color: var(--bg-core);
+  color: #e2e8f0;
+  overflow: hidden; 
+  user-select: none;
+  background-image: 
+    linear-gradient(rgba(57, 255, 20, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(57, 255, 20, 0.03) 1px, transparent 1px);
+  background-size: 30px 30px;
+  transition: background-color 1s ease, background-image 1s ease;
+}
+
+/* Faixas de contenção radioativa animadas */
+@keyframes hazard-pan {
+  0% { background-position: 0 0; }
+  100% { background-position: 28px 0; }
+}
+
+.hazard-bg {
+  background: repeating-linear-gradient(
+    -45deg,
+    rgba(0, 0, 0, 0.6),
+    rgba(0, 0, 0, 0.6) 10px,
+    rgba(57, 255, 20, 0.15) 10px,
+    rgba(57, 255, 20, 0.15) 20px
+  );
+  animation: hazard-pan 3s linear infinite;
+  border: 1px solid var(--toxic-primary);
+}
+
+.glass-cell {
+  background: var(--panel-glass);
+  backdrop-filter: blur(4px);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+/* =========================================
+   EASTER EGG: MODO FORJA ESTELAR (CÓSMICO)
+   ========================================= */
+.theme-cosmic {
+  --bg-core: #050514; /* Vácuo espacial azul profundo */
+  --panel-glass: rgba(15, 15, 35, 0.6);
+  --toxic-primary: #00f0ff; /* Ciano de nebulosa */
+}
+
+/* Sobrescreve o fundo global quando ativado */
+.theme-cosmic body {
+  background-image: 
+    radial-gradient(2px 2px at 20px 30px, #ffffff, rgba(0,0,0,0)),
+    radial-gradient(2px 2px at 40px 70px, #e2e8f0, rgba(0,0,0,0)),
+    radial-gradient(2px 2px at 50px 160px, #cbd5e1, rgba(0,0,0,0)),
+    radial-gradient(2px 2px at 90px 40px, #ffffff, rgba(0,0,0,0)),
+    radial-gradient(2px 2px at 130px 80px, #e2e8f0, rgba(0,0,0,0)),
+    radial-gradient(2px 2px at 160px 120px, #94a3b8, rgba(0,0,0,0));
+  background-repeat: repeat;
+  background-size: 200px 200px;
+  animation: cosmic-drift 100s linear infinite;
+}
+
+/* Faz o fundo estrelado mover levemente */
+@keyframes cosmic-drift {
+  from { background-position: 0 0; }
+  to { background-position: -1000px 500px; }
+}
+
+/* Altera as listras de perigo para um brilho roxo nas supernovas (Actinídeos) */
+.theme-cosmic .hazard-bg {
+  background: repeating-linear-gradient(
+    -45deg,
+    rgba(0, 0, 0, 0.6),
+    rgba(0, 0, 0, 0.6) 10px,
+    rgba(176, 38, 255, 0.25) 10px, /* Roxo estelar */
+    rgba(176, 38, 255, 0.25) 20px
+  );
+  border-color: #b026ff;
+  box-shadow: 0 0 20px rgba(176, 38, 255, 0.3);
+  color: #e8b0ff;
+}
+
+/* =========================================
+   MODELO ATÔMICO 3D (HUD)
+   ========================================= */
+.atom-container {
+  /* Define a profundidade do 3D */
+  perspective: 800px;
+  transform-style: preserve-3d;
+}
+
+.orbit {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  border: 1px solid currentColor;
+  transform-style: preserve-3d;
+}
+
+/* Os elétrons (pontos brilhantes rodando nas órbitas) */
+.orbit::before {
+  content: '';
+  position: absolute;
+  top: -2px;
+  left: calc(50% - 2px);
+  width: 4px;
+  height: 4px;
+  background-color: currentColor;
+  border-radius: 50%;
+  box-shadow: 0 0 10px currentColor, 0 0 20px currentColor;
+}
+
+/* Configuração base de rotação */
+.orbit-1 { animation: spin-orbit1 4s linear infinite; }
+.orbit-2 { animation: spin-orbit2 5s linear infinite; }
+.orbit-3 { animation: spin-orbit3 6s linear infinite; }
+
+/* Rotações matemáticas nos eixos X, Y e Z para criar o globo */
+@keyframes spin-orbit1 {
+  0% { transform: rotateX(65deg) rotateY(35deg) rotateZ(0deg); }
+  100% { transform: rotateX(65deg) rotateY(35deg) rotateZ(360deg); }
+}
+@keyframes spin-orbit2 {
+  0% { transform: rotateX(45deg) rotateY(-60deg) rotateZ(0deg); }
+  100% { transform: rotateX(45deg) rotateY(-60deg) rotateZ(360deg); }
+}
+@keyframes spin-orbit3 {
+  0% { transform: rotateX(-55deg) rotateY(45deg) rotateZ(0deg); }
+  100% { transform: rotateX(-55deg) rotateY(45deg) rotateZ(360deg); }
 }
