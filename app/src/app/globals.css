@@ -1,73 +1,130 @@
 @import "tailwindcss";
 
-:root {
-  --bg-core: #040704;
-  --panel-glass: rgba(10, 20, 10, 0.6);
-  --toxic-primary: #39ff14;
-}
+@custom-variant dark (&:is(.dark *));
 
 @theme inline {
-  --color-toxic: var(--toxic-primary);
-  --color-core: var(--bg-core);
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-border: var(--border);
+  --color-ring: var(--ring);
+  --font-sans: var(--font-inter);
+  --font-serif: var(--font-cinzel);
+  --font-mono: var(--font-jetbrains);
+  --font-heading: var(--font-cinzel);
 }
 
-html,
-body {
-  height: 100%;
+:root,
+.dark {
+  /* Paleta unificada com Universe */
+  --background: oklch(0.05 0.012 260);
+  --foreground: oklch(0.95 0.02 260);
+
+  --card: oklch(0.15 0.04 260);
+  --card-foreground: oklch(0.95 0.02 260);
+
+  /* Roxo Místico — primário do Universe */
+  --primary: oklch(0.60 0.18 290);
+  --primary-foreground: oklch(0.98 0 0);
+
+  --muted: oklch(0.20 0.05 260);
+  --muted-foreground: oklch(0.70 0.02 260);
+
+  --border: oklch(1 0 0 / 8%);
+  --ring: oklch(0.60 0.18 290);
+
+  /* Easter egg invertido — toxic green legacy (ativado por .theme-toxic) */
+  --accent-easter: #39ff14;
+}
+
+@layer base {
+  * {
+    border-color: var(--border);
+  }
+  body {
+    background-color: var(--background);
+    color: var(--foreground);
+  }
+  html {
+    font-family: var(--font-sans), system-ui, sans-serif;
+  }
 }
 
 body {
-  background-color: var(--bg-core);
-  color: #e2e8f0;
-  overflow: hidden;
   user-select: none;
   background-image:
-    linear-gradient(rgba(57, 255, 20, 0.03) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(57, 255, 20, 0.03) 1px, transparent 1px);
-  background-size: 30px 30px;
-  transition: background-color 1s ease, background-image 1s ease;
+    radial-gradient(ellipse at 20% 10%, oklch(0.20 0.08 290 / 0.08) 0%, transparent 45%),
+    radial-gradient(ellipse at 80% 90%, oklch(0.20 0.08 220 / 0.06) 0%, transparent 45%);
+  background-attachment: fixed;
 }
 
-/* Vinheta sutil para dar profundidade ao HUD */
-body::after {
+/* ─── Grid cartográfico ambiente (do Universe) ───────────────── */
+.bg-grid {
+  background-image:
+    linear-gradient(to right, oklch(1 0 0 / 0.025) 1px, transparent 1px),
+    linear-gradient(to bottom, oklch(1 0 0 / 0.025) 1px, transparent 1px);
+  background-size: 64px 64px;
+  background-position: -1px -1px;
+}
+
+/* ─── Vignette radial sutil ──────────────────────────────────── */
+.bg-vignette::after {
   content: "";
   position: fixed;
   inset: 0;
   pointer-events: none;
+  z-index: 0;
   background: radial-gradient(
     ellipse at center,
-    transparent 55%,
-    rgba(0, 0, 0, 0.55) 100%
+    transparent 50%,
+    oklch(0 0 0 / 0.55) 100%
   );
-  z-index: 1;
 }
 
-/* Scan-lines horizontais quase imperceptíveis (efeito CRT) */
-.scanlines {
-  position: fixed;
-  inset: 0;
-  pointer-events: none;
-  z-index: 2;
-  background: repeating-linear-gradient(
-    to bottom,
-    rgba(255, 255, 255, 0.02) 0px,
-    rgba(255, 255, 255, 0.02) 1px,
-    transparent 1px,
-    transparent 3px
-  );
-  mix-blend-mode: overlay;
+/* ─── Keyframes HUD (portados do Universe) ───────────────────── */
+@keyframes hud-pulse {
+  0%, 100% { opacity: 0.4; }
+  50%      { opacity: 1; }
+}
+@keyframes hud-flicker {
+  0%, 19%, 21%, 23%, 25%, 54%, 56%, 100% { opacity: 1; }
+  20%, 24%, 55% { opacity: 0.4; }
+}
+@keyframes hud-blink {
+  0%, 49% { opacity: 1; }
+  50%, 100% { opacity: 0; }
+}
+@keyframes spin-slow {
+  to { transform: rotate(360deg); }
+}
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
 }
 
-/* Scrollbar discreta no tema toxic, caso algum container precise rolar */
-*::-webkit-scrollbar { width: 8px; height: 8px; }
-*::-webkit-scrollbar-track { background: transparent; }
-*::-webkit-scrollbar-thumb {
-  background: rgba(57, 255, 20, 0.25);
-  border-radius: 4px;
+.animate-spin-slow {
+  animation: spin-slow 18s linear infinite;
 }
-*::-webkit-scrollbar-thumb:hover { background: rgba(57, 255, 20, 0.45); }
+.animate-blink {
+  animation: hud-blink 1.1s step-end infinite;
+}
+.animate-hud-pulse {
+  animation: hud-pulse 2s ease-in-out infinite;
+}
 
-/* Faixas de contenção radioativa animadas */
+/* ─── Glass cell (recolorida para paleta nova) ───────────────── */
+.glass-cell {
+  background: oklch(0.15 0.04 260 / 0.55);
+  backdrop-filter: blur(4px);
+  border: 1px solid oklch(1 0 0 / 0.06);
+}
+
+/* ─── Faixas de "perigo" — agora em roxo estelar por default ─ */
 @keyframes hazard-pan {
   0% { background-position: 0 0; }
   100% { background-position: 28px 0; }
@@ -76,84 +133,32 @@ body::after {
 .hazard-bg {
   background: repeating-linear-gradient(
     -45deg,
-    rgba(0, 0, 0, 0.6),
-    rgba(0, 0, 0, 0.6) 10px,
-    rgba(57, 255, 20, 0.15) 10px,
-    rgba(57, 255, 20, 0.15) 20px
+    oklch(0 0 0 / 0.6),
+    oklch(0 0 0 / 0.6) 10px,
+    oklch(0.60 0.18 290 / 0.22) 10px,
+    oklch(0.60 0.18 290 / 0.22) 20px
   );
   animation: hazard-pan 3s linear infinite;
-  border: 1px solid var(--toxic-primary);
+  border: 1px solid oklch(0.60 0.18 290);
 }
 
-.glass-cell {
-  background: var(--panel-glass);
-  backdrop-filter: blur(4px);
-  border: 1px solid rgba(255, 255, 255, 0.05);
+/* ─── Easter egg invertido: tema toxic green legado ──────────── */
+.theme-toxic {
+  --primary: var(--accent-easter);
+  --ring: var(--accent-easter);
 }
-
-/* Rotação lenta usada no ícone Radar do header */
-@keyframes spin-slow {
-  to { transform: rotate(360deg); }
-}
-.animate-spin-slow {
-  animation: spin-slow 4s linear infinite;
-}
-
-/* Pulso suave para indicadores de status */
-@keyframes status-pulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.35; }
-}
-.animate-status-pulse {
-  animation: status-pulse 1.6s ease-in-out infinite;
-}
-
-/* =========================================
-   EASTER EGG: MODO FORJA ESTELAR (CÓSMICO)
-   ========================================= */
-.theme-cosmic {
-  --bg-core: #050514; /* Vácuo espacial azul profundo */
-  --panel-glass: rgba(15, 15, 35, 0.6);
-  --toxic-primary: #00f0ff; /* Ciano de nebulosa */
-}
-
-/* Sobrescreve o fundo global quando ativado */
-.theme-cosmic body {
-  background-image:
-    radial-gradient(2px 2px at 20px 30px, #ffffff, rgba(0,0,0,0)),
-    radial-gradient(2px 2px at 40px 70px, #e2e8f0, rgba(0,0,0,0)),
-    radial-gradient(2px 2px at 50px 160px, #cbd5e1, rgba(0,0,0,0)),
-    radial-gradient(2px 2px at 90px 40px, #ffffff, rgba(0,0,0,0)),
-    radial-gradient(2px 2px at 130px 80px, #e2e8f0, rgba(0,0,0,0)),
-    radial-gradient(2px 2px at 160px 120px, #94a3b8, rgba(0,0,0,0));
-  background-repeat: repeat;
-  background-size: 200px 200px;
-  animation: cosmic-drift 100s linear infinite;
-}
-
-/* Faz o fundo estrelado mover levemente */
-@keyframes cosmic-drift {
-  from { background-position: 0 0; }
-  to { background-position: -1000px 500px; }
-}
-
-/* Altera as listras de perigo para um brilho roxo nas supernovas (Actinídeos) */
-.theme-cosmic .hazard-bg {
+.theme-toxic .hazard-bg {
   background: repeating-linear-gradient(
     -45deg,
     rgba(0, 0, 0, 0.6),
     rgba(0, 0, 0, 0.6) 10px,
-    rgba(176, 38, 255, 0.25) 10px,
-    rgba(176, 38, 255, 0.25) 20px
+    rgba(57, 255, 20, 0.18) 10px,
+    rgba(57, 255, 20, 0.18) 20px
   );
-  border-color: #b026ff;
-  box-shadow: 0 0 20px rgba(176, 38, 255, 0.3);
-  color: #e8b0ff;
+  border-color: #39ff14;
 }
 
-/* =========================================
-   MODELO ATÔMICO 3D (HUD)
-   ========================================= */
+/* ─── Modelo atômico 3D (mantido para o modal) ──────────────── */
 .atom-container {
   perspective: 800px;
   transform-style: preserve-3d;
@@ -170,7 +175,6 @@ body::after {
   transform-style: preserve-3d;
 }
 
-/* Os elétrons (pontos brilhantes rodando nas órbitas) */
 .orbit::before {
   content: '';
   position: absolute;
@@ -183,12 +187,10 @@ body::after {
   box-shadow: 0 0 10px currentColor, 0 0 20px currentColor;
 }
 
-/* Configuração base de rotação */
 .orbit-1 { animation: spin-orbit1 4s linear infinite; }
 .orbit-2 { animation: spin-orbit2 5s linear infinite; }
 .orbit-3 { animation: spin-orbit3 6s linear infinite; }
 
-/* Rotações matemáticas nos eixos X, Y e Z para criar o globo */
 @keyframes spin-orbit1 {
   0% { transform: rotateX(65deg) rotateY(35deg) rotateZ(0deg); }
   100% { transform: rotateX(65deg) rotateY(35deg) rotateZ(360deg); }
@@ -200,4 +202,30 @@ body::after {
 @keyframes spin-orbit3 {
   0% { transform: rotateX(-55deg) rotateY(45deg) rotateZ(0deg); }
   100% { transform: rotateX(-55deg) rotateY(45deg) rotateZ(360deg); }
+}
+
+/* ─── Scrollbar customizada ──────────────────────────────────── */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: oklch(1 0 0 / 0.02);
+}
+::-webkit-scrollbar-thumb {
+  background: oklch(1 0 0 / 0.10);
+  border-radius: 999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--primary);
+}
+* {
+  scrollbar-width: thin;
+  scrollbar-color: oklch(1 0 0 / 0.12) transparent;
+}
+
+/* ─── Selection tinted ───────────────────────────────────────── */
+::selection {
+  background: var(--primary);
+  color: oklch(0.05 0 0);
 }

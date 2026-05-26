@@ -1,113 +1,48 @@
-import { ElementCategory } from '@/src/data/elementsData';
+import type { ElementCategory } from "@/src/data/elementsData";
 
-export interface CategoryMeta {
-  id: ElementCategory;
-  label: string;
-  /** Tailwind classes used on the cell (text + hover border + glow). */
-  cellClass: string;
-  /** Tailwind text class on its own (e.g. for legend dots and active filter). */
-  textClass: string;
-  /** Raw hex used by SVG dots and inline glows. */
-  hex: string;
-}
+/**
+ * Accent color OKLCH por categoria, alinhado com a paleta do Universe.
+ * Usado para texto/borda/glow nas células e badges.
+ */
+export const categoryAccent: Record<ElementCategory, string> = {
+  "nonmetal":              "oklch(0.74 0.15 145)", /* verde-ciano sereno */
+  "noble-gas":             "oklch(0.72 0.14 220)", /* azul frio */
+  "alkali-metal":          "oklch(0.78 0.16 80)",  /* dourado quente */
+  "alkaline-earth-metal":  "oklch(0.80 0.16 70)",  /* amarelo solar */
+  "metalloid":             "oklch(0.70 0.13 200)", /* azul-petróleo */
+  "halogen":               "oklch(0.70 0.17 320)", /* magenta */
+  "post-transition-metal": "oklch(0.72 0.14 50)",  /* âmbar */
+  "transition-metal":      "oklch(0.78 0.04 260)", /* neutro azulado */
+  "lanthanide":            "oklch(0.68 0.18 290)", /* roxo primário */
+  "actinide":              "oklch(0.62 0.22 305)", /* roxo singularidade */
+};
 
-export const CATEGORIES: CategoryMeta[] = [
-  {
-    id: 'nonmetal',
-    label: 'Não Metais',
-    textClass: 'text-emerald-300',
-    cellClass:
-      'text-emerald-300 hover:border-emerald-400 hover:shadow-[0_0_15px_rgba(52,211,153,0.3)]',
-    hex: '#6ee7b7',
-  },
-  {
-    id: 'noble-gas',
-    label: 'Gases Nobres',
-    textClass: 'text-cyan-300',
-    cellClass:
-      'text-cyan-300 hover:border-cyan-400 hover:shadow-[0_0_15px_rgba(34,211,238,0.3)]',
-    hex: '#67e8f9',
-  },
-  {
-    id: 'alkali-metal',
-    label: 'Metais Alcalinos',
-    textClass: 'text-amber-500',
-    cellClass:
-      'text-amber-500 hover:border-amber-400 hover:shadow-[0_0_15px_rgba(251,191,36,0.3)]',
-    hex: '#f59e0b',
-  },
-  {
-    id: 'alkaline-earth-metal',
-    label: 'Alcalino-Terrosos',
-    textClass: 'text-yellow-400',
-    cellClass:
-      'text-yellow-400 hover:border-yellow-400 hover:shadow-[0_0_15px_rgba(250,204,21,0.3)]',
-    hex: '#facc15',
-  },
-  {
-    id: 'metalloid',
-    label: 'Metaloides',
-    textClass: 'text-teal-400',
-    cellClass:
-      'text-teal-400 hover:border-teal-400 hover:shadow-[0_0_15px_rgba(45,212,191,0.3)]',
-    hex: '#2dd4bf',
-  },
-  {
-    id: 'halogen',
-    label: 'Halogênios',
-    textClass: 'text-fuchsia-400',
-    cellClass:
-      'text-fuchsia-400 hover:border-fuchsia-400 hover:shadow-[0_0_15px_rgba(232,121,249,0.3)]',
-    hex: '#e879f9',
-  },
-  {
-    id: 'post-transition-metal',
-    label: 'Pós-Transição',
-    textClass: 'text-blue-400',
-    cellClass:
-      'text-blue-400 hover:border-blue-400 hover:shadow-[0_0_15px_rgba(96,165,250,0.3)]',
-    hex: '#60a5fa',
-  },
-  {
-    id: 'transition-metal',
-    label: 'Metais de Transição',
-    textClass: 'text-slate-300',
-    cellClass:
-      'text-slate-300 hover:border-slate-300 hover:shadow-[0_0_15px_rgba(203,213,225,0.3)]',
-    hex: '#cbd5e1',
-  },
-  {
-    id: 'lanthanide',
-    label: 'Lantanídeos',
-    textClass: 'text-indigo-300',
-    cellClass:
-      'text-indigo-300 hover:border-indigo-400 hover:shadow-[0_0_15px_rgba(165,180,252,0.3)]',
-    hex: '#a5b4fc',
-  },
-  {
-    id: 'actinide',
-    label: 'Actinídeos',
-    textClass: 'text-toxic',
-    cellClass:
-      'text-toxic hazard-bg font-bold shadow-[0_0_10px_rgba(57,255,20,0.1)] hover:shadow-[0_0_20px_rgba(57,255,20,0.6)]',
-    hex: '#39ff14',
-  },
+/**
+ * Classes Tailwind por categoria — text + hover border + hover glow.
+ * Atinge a mesma família visual usando utilitários estáticos do Tailwind.
+ */
+export const categoryStyles: Record<ElementCategory, string> = {
+  "nonmetal":              "text-emerald-200 hover:border-emerald-300/60 hover:shadow-[0_0_18px_rgba(110,231,183,0.25)]",
+  "noble-gas":             "text-sky-200 hover:border-sky-300/60 hover:shadow-[0_0_18px_rgba(125,211,252,0.25)]",
+  "alkali-metal":          "text-amber-200 hover:border-amber-300/60 hover:shadow-[0_0_18px_rgba(252,211,77,0.25)]",
+  "alkaline-earth-metal":  "text-yellow-200 hover:border-yellow-300/60 hover:shadow-[0_0_18px_rgba(253,224,71,0.25)]",
+  "metalloid":             "text-teal-200 hover:border-teal-300/60 hover:shadow-[0_0_18px_rgba(94,234,212,0.25)]",
+  "halogen":               "text-fuchsia-200 hover:border-fuchsia-300/60 hover:shadow-[0_0_18px_rgba(240,171,252,0.25)]",
+  "post-transition-metal": "text-orange-200 hover:border-orange-300/60 hover:shadow-[0_0_18px_rgba(253,186,116,0.25)]",
+  "transition-metal":      "text-slate-200 hover:border-slate-300/60 hover:shadow-[0_0_18px_rgba(203,213,225,0.20)]",
+  "lanthanide":            "text-violet-200 hover:border-violet-300/60 hover:shadow-[0_0_18px_rgba(196,181,253,0.30)]",
+  "actinide":              "text-purple-200 hazard-bg hover:shadow-[0_0_24px_rgba(192,132,252,0.45)]",
+};
+
+export const filterCategories: { id: ElementCategory; label: string }[] = [
+  { id: "nonmetal", label: "Não Metais" },
+  { id: "noble-gas", label: "Gases Nobres" },
+  { id: "alkali-metal", label: "Metais Alcalinos" },
+  { id: "alkaline-earth-metal", label: "Alcalino-Terrosos" },
+  { id: "metalloid", label: "Metaloides" },
+  { id: "halogen", label: "Halogênios" },
+  { id: "post-transition-metal", label: "Pós-Transição" },
+  { id: "transition-metal", label: "Metais de Transição" },
+  { id: "lanthanide", label: "Lantanídeos" },
+  { id: "actinide", label: "Actinídeos" },
 ];
-
-export const categoryMap: Record<ElementCategory, CategoryMeta> =
-  CATEGORIES.reduce((acc, c) => {
-    acc[c.id] = c;
-    return acc;
-  }, {} as Record<ElementCategory, CategoryMeta>);
-
-/** @deprecated use categoryMap[id].cellClass */
-export const categoryStyles: Record<ElementCategory, string> = CATEGORIES.reduce(
-  (acc, c) => {
-    acc[c.id] = c.cellClass;
-    return acc;
-  },
-  {} as Record<ElementCategory, string>,
-);
-
-/** @deprecated use CATEGORIES */
-export const filterCategories = CATEGORIES.map(({ id, label }) => ({ id, label }));
