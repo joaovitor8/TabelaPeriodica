@@ -14,6 +14,8 @@ interface ElementCellProps {
   element: ChemicalElement;
   dimmed: boolean;
   onClick: (el: ChemicalElement) => void;
+  pulse?: boolean;
+  tintOverride?: string;
 }
 
 const RESERVOIR_KEY: Record<keyof AbundanceProfile, DictKey> = {
@@ -38,13 +40,40 @@ function dominantReservoir(ab?: AbundanceProfile): keyof AbundanceProfile | null
   return best;
 }
 
-export function ElementCell({ element, dimmed, onClick }: ElementCellProps) {
+export function ElementCell({
+  element,
+  dimmed,
+  onClick,
+  pulse = false,
+  tintOverride,
+}: ElementCellProps) {
   const { t } = useLocale();
   const gridRow = element.row >= 8 ? element.row + 1 : element.row;
 
   const OriginIcon = element.cosmicOrigin ? COSMIC_ICON[element.cosmicOrigin] : null;
   const originTint = element.cosmicOrigin ? COSMIC_TINT[element.cosmicOrigin] : undefined;
   const topReservoir = dominantReservoir(element.abundance);
+
+  const overrideStyle: React.CSSProperties | undefined = tintOverride
+    ? {
+        gridColumn: element.column,
+        gridRow,
+        ["--cat-accent" as string]: tintOverride,
+        color: tintOverride,
+        borderColor: `color-mix(in oklch, ${tintOverride} 45%, transparent)`,
+        background: `color-mix(in oklch, ${tintOverride} 8%, oklch(0.15 0.04 260 / 0.55))`,
+        boxShadow: `0 0 16px color-mix(in oklch, ${tintOverride} 30%, transparent)`,
+      }
+    : {
+        gridColumn: element.column,
+        gridRow,
+        ...(pulse
+          ? {
+              ["--cat-accent" as string]:
+                element.cosmicOrigin && originTint ? originTint : "var(--primary)",
+            }
+          : {}),
+      };
 
   return (
     <motion.button
@@ -53,11 +82,13 @@ export function ElementCell({ element, dimmed, onClick }: ElementCellProps) {
       animate={{ opacity: 1, scale: 1 }}
       transition={{ duration: 0.2 }}
       whileHover={{ scale: dimmed ? 1 : 1.1, zIndex: dimmed ? 1 : 50 }}
-      style={{ gridColumn: element.column, gridRow }}
+      style={overrideStyle}
       className={`
         @container group relative w-full h-full flex flex-col items-center justify-center
         glass-cell transition-all duration-500 cursor-crosshair rounded-sm
-        ${dimmed ? "opacity-10 grayscale brightness-50 pointer-events-none" : categoryStyles[element.category]}
+        ${dimmed ? "opacity-10 grayscale brightness-50 pointer-events-none" : ""}
+        ${!dimmed && !tintOverride ? categoryStyles[element.category] : ""}
+        ${pulse && !dimmed ? "eod-halo z-10" : ""}
       `}
     >
       <span className="absolute top-[5%] left-[8%] text-[15cqw] font-mono opacity-60 group-hover:opacity-100 transition-opacity">

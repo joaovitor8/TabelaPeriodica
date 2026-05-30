@@ -61,4 +61,12 @@ export interface ChemicalElement {
 
   discoveryYear?: number | "ancient";
   discoveredBy?: string;
+
+  /** Cor de chama em teste de chama (hex CSS). Apenas para elementos com chama visível notável. */
+  flameColor?: string;
+  flameColorName?: string;
+  flameColorNameEn?: string;
+
+  /** Linhas espectrais de emissão mais notáveis, em nanômetros. */
+  spectralLines?: number[];
 }

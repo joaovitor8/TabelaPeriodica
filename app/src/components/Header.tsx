@@ -1,13 +1,15 @@
 "use client";
 
 import Link from "next/link";
-import { Atom, ArrowLeft } from "lucide-react";
+import { Atom, ArrowLeft, Volume2, VolumeX } from "lucide-react";
 
 import { LocaleToggle } from "./LocaleToggle";
 import { useT } from "@/src/lib/i18n";
+import { useSoundEnabled } from "@/src/hooks/useSoundEnabled";
 
 export function Header() {
   const t = useT();
+  const { enabled: soundEnabled, toggle: toggleSound } = useSoundEnabled();
   const universeUrl = process.env.NEXT_PUBLIC_UNIVERSE_URL ?? "/";
 
   return (
@@ -31,6 +33,19 @@ export function Header() {
 
         {/* Right cluster */}
         <div className="flex items-center gap-2 sm:gap-3">
+          <button
+            onClick={toggleSound}
+            title={soundEnabled ? t("audio.disable") : t("audio.enable")}
+            aria-label={soundEnabled ? t("audio.disable") : t("audio.enable")}
+            className={`p-2 rounded-full border transition-all ${
+              soundEnabled
+                ? "border-[color:var(--primary)]/50 text-[color:var(--primary)] bg-[color:var(--primary)]/10"
+                : "border-white/15 text-white/50 hover:text-white hover:border-white/30"
+            }`}
+          >
+            {soundEnabled ? <Volume2 className="w-4 h-4" /> : <VolumeX className="w-4 h-4" />}
+          </button>
+
           <LocaleToggle />
 
           <a
@@ -40,7 +55,7 @@ export function Header() {
           >
             <ArrowLeft className="w-3.5 h-3.5" />
             <span className="hidden sm:inline">{t("nav.back")}</span>
-            <span className="sm:hidden">Universe</span>
+            <span className="sm:hidden">{t("nav.backShort")}</span>
           </a>
         </div>
       </div>

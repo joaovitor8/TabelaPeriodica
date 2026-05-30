@@ -1,24 +1,62 @@
 "use client";
 
-import { useState } from "react";
-import { Radar, Sparkles } from "lucide-react";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { Radar, Search, Sparkles } from "lucide-react";
 import { motion } from "framer-motion";
 
-import { elements, type ChemicalElement } from "@/src/data/elementsData";
-import { useT } from "@/src/lib/i18n";
+import { elements, elementByZ, type ChemicalElement } from "@/src/data/elementsData";
+import { pickLocale, useLocale, useT } from "@/src/lib/i18n";
 import { useElementFilter } from "@/src/hooks/useElementFilter";
+import { useSelectedSync } from "@/src/hooks/useSelectedSync";
+import { useIsMac } from "@/src/hooks/useIsMac";
+import { elementOfDay } from "@/src/utils/elementOfDay";
+import { COSMIC_TINT } from "@/src/utils/cosmicMeta";
+import { categoryAccent } from "@/src/utils/tableConstants";
 
 import { ElementCell } from "./ElementCell";
 import { ElementModal } from "./ElementModal";
 import { ScannerPanel } from "./ScannerPanel";
 import { CosmicTimeline } from "./CosmicTimeline";
+import { CommandPalette } from "./CommandPalette";
+import { CompareDrawer } from "./CompareDrawer";
+import { CompareModal } from "./CompareModal";
+import { StardustIntro, StardustChip } from "./StardustMode";
 
 export default function PeriodicTable() {
   const t = useT();
+  const { locale } = useLocale();
   const filter = useElementFilter();
+  const isMac = useIsMac();
+  const shortcutLabel = isMac ? "⌘K" : "Ctrl+K";
+
   const [selected, setSelected] = useState<ChemicalElement | null>(null);
   const [showFilters, setShowFilters] = useState(false);
   const [showTimeline, setShowTimeline] = useState(false);
+  const [paletteOpen, setPaletteOpen] = useState(false);
+  const [compareOpen, setCompareOpen] = useState(false);
+  const [stardustState, setStardustState] = useState<"off" | "intro" | "active">("off");
+  const [eod, setEod] = useState<ChemicalElement | null>(null);
+
+  useSelectedSync(selected, setSelected);
+
+  // EOD hidrata só no client pra evitar mismatch
+  useEffect(() => {
+    const raf = requestAnimationFrame(() => setEod(elementOfDay()));
+    return () => cancelAnimationFrame(raf);
+  }, []);
+
+  // Atalho ⌘K / Ctrl+K
+  useEffect(() => {
+    function onKey(e: KeyboardEvent) {
+      const isPaletteShortcut = (e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k";
+      if (isPaletteShortcut) {
+        e.preventDefault();
+        setPaletteOpen((v) => !v);
+      }
+    }
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, []);
 
   const closeFilters = () => {
     setShowFilters(false);
@@ -30,6 +68,45 @@ export default function PeriodicTable() {
     setSelected(el);
   };
 
+  const navigateElement = useCallback((delta: number) => {
+    setSelected((cur) => {
+      if (!cur) return cur;
+      return elementByZ(cur.number + delta) ?? cur;
+    });
+  }, []);
+
+  const enterStardust = () => {
+    filter.clear();
+    setShowFilters(false);
+    setStardustState("active");
+  };
+
+  const exitStardust = () => setStardustState("off");
+
+  const openStardustIntro = () => {
+    if (stardustState === "active") {
+      exitStardust();
+      return;
+    }
+    setStardustState("intro");
+  };
+
+  const stardustActive = stardustState === "active";
+  const eodSymbol = eod?.symbol;
+  const eodName = eod ? pickLocale(eod.name, eod.nameEn, locale) : "";
+  const eodAccent = eod ? categoryAccent[eod.category] : undefined;
+
+  const cellStardustTint = useMemo(() => {
+    if (!stardustActive) return null;
+    return (el: ChemicalElement) =>
+      el.cosmicOrigin ? COSMIC_TINT[el.cosmicOrigin] : "oklch(0.65 0.02 260)";
+  }, [stardustActive]);
+
+  function isStardustHidden(el: ChemicalElement): boolean {
+    if (!stardustActive) return false;
+    return !el.abundance?.humanBody || el.abundance.humanBody <= 0;
+  }
+
   return (
     <div className="flex flex-col items-center w-full min-h-[calc(100vh-4rem)] px-2 sm:px-4 lg:px-8 py-4 relative">
       {/* Title strip + controls */}
@@ -40,14 +117,57 @@ export default function PeriodicTable() {
           className="flex flex-col"
         >
           <span className="font-mono text-[10px] tracking-[0.35em] uppercase text-[color:var(--primary)] opacity-70">
-            EL-001 → EL-118
+            {t("table.range")}
           </span>
           <h1 className="font-serif text-2xl sm:text-3xl tracking-[0.15em] uppercase">
             {t("nav.brand")}
           </h1>
+          {eod && eodSymbol && (
+            <button
+              onClick={() => setSelected(eod)}
+              className="mt-1.5 inline-flex items-center gap-2 self-start px-2 py-0.5 rounded-full border text-[10px] font-mono uppercase tracking-[0.2em] hover:scale-[1.03] transition-transform"
+              style={{
+                color: eodAccent,
+                borderColor: (eodAccent ?? "var(--primary)") + "55",
+                background: `color-mix(in oklch, ${eodAccent ?? "var(--primary)"} 10%, transparent)`,
+              }}
+              title={eodName}
+            >
+              <Sparkles className="w-3 h-3" />
+              <span className="opacity-70">{t("eod.label")}:</span>
+              <span className="font-bold">{eodSymbol}</span>
+            </button>
+          )}
         </motion.div>
 
         <div className="flex items-center gap-2">
+          {stardustActive && <StardustChip onExit={exitStardust} />}
+
+          <button
+            onClick={() => setPaletteOpen(true)}
+            className="flex items-center gap-2 px-3 sm:px-4 py-2 font-mono text-xs uppercase rounded-full border border-white/15 text-white/60 hover:border-[color:var(--primary)]/60 hover:text-[color:var(--primary)] bg-black/30 transition-all"
+            title={`${t("palette.openHint")} (${shortcutLabel})`}
+          >
+            <Search className="w-4 h-4" />
+            <span className="hidden sm:inline">{t("palette.openHint")}</span>
+            <kbd className="hidden md:inline text-[9px] px-1.5 py-0.5 rounded border border-white/10 text-white/50">
+              {shortcutLabel}
+            </kbd>
+          </button>
+
+          <button
+            onClick={openStardustIntro}
+            className={`flex items-center gap-2 px-3 sm:px-4 py-2 font-mono text-xs uppercase rounded-full border transition-all ${
+              stardustActive
+                ? "border-[color:var(--primary)] text-[color:var(--primary)] bg-[color:var(--primary)]/10"
+                : "border-white/15 text-white/60 hover:border-[color:var(--primary)]/60 hover:text-[color:var(--primary)] bg-black/30"
+            }`}
+            title={t("stardust.button")}
+          >
+            <Sparkles className={`w-4 h-4 ${stardustActive ? "animate-hud-pulse" : ""}`} />
+            <span className="hidden sm:inline">{t("stardust.button")}</span>
+          </button>
+
           <button
             onClick={() => setShowTimeline(true)}
             className="flex items-center gap-2 px-3 sm:px-4 py-2 font-mono text-xs uppercase rounded-full border border-white/15 text-white/60 hover:border-[color:var(--primary)]/60 hover:text-[color:var(--primary)] bg-black/30 transition-all"
@@ -58,8 +178,11 @@ export default function PeriodicTable() {
 
           <button
             onClick={() => setShowFilters(!showFilters)}
+            disabled={stardustActive}
             className={`flex items-center gap-2 px-3 sm:px-4 py-2 font-mono text-xs uppercase rounded-full border transition-all duration-300 ${
-              showFilters || filter.isActive
+              stardustActive
+                ? "opacity-40 cursor-not-allowed border-white/10 text-white/30"
+                : showFilters || filter.isActive
                 ? "border-[color:var(--primary)] text-[color:var(--primary)] bg-[color:var(--primary)]/10 shadow-[0_0_18px_oklch(0.60_0.18_290_/_0.30)]"
                 : "border-white/15 text-white/60 hover:border-white/40 hover:text-white bg-black/30"
             }`}
@@ -70,7 +193,7 @@ export default function PeriodicTable() {
         </div>
       </div>
 
-      <ScannerPanel showFilters={showFilters} filter={filter} onClose={closeFilters} />
+      <ScannerPanel showFilters={showFilters && !stardustActive} filter={filter} onClose={closeFilters} />
 
       {/* GRID DA TABELA */}
       <div
@@ -91,18 +214,36 @@ export default function PeriodicTable() {
             <ElementCell
               key={el.number}
               element={el}
-              dimmed={filter.isDimmed(el)}
+              dimmed={isStardustHidden(el) || filter.isDimmed(el)}
               onClick={setSelected}
+              pulse={eod?.number === el.number}
+              tintOverride={cellStardustTint ? cellStardustTint(el) : undefined}
             />
           ))}
         </div>
       </div>
 
-      <ElementModal selected={selected} onClose={() => setSelected(null)} />
+      <ElementModal
+        selected={selected}
+        onClose={() => setSelected(null)}
+        onNavigate={navigateElement}
+      />
       <CosmicTimeline
         open={showTimeline}
         onClose={() => setShowTimeline(false)}
         onSelect={openFromTimeline}
+      />
+      <CommandPalette
+        open={paletteOpen}
+        onClose={() => setPaletteOpen(false)}
+        onSelect={setSelected}
+      />
+      <CompareDrawer onOpenCompare={() => setCompareOpen(true)} />
+      <CompareModal open={compareOpen} onClose={() => setCompareOpen(false)} />
+      <StardustIntro
+        open={stardustState === "intro"}
+        onEnter={enterStardust}
+        onClose={() => setStardustState("off")}
       />
     </div>
   );

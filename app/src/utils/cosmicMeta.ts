@@ -45,3 +45,44 @@ export const COSMIC_TINT: Record<CosmicOrigin, string> = {
   "white-dwarf-explosion": "oklch(0.72 0.14 220)",
   "human-made": "oklch(0.74 0.15 145)",
 };
+
+/**
+ * Idade aproximada do universo (em anos) quando cada origem começa a produzir elementos
+ * de forma significativa. Big Bang ≈ 0 (3 minutos após); hoje ≈ 1.38e10.
+ */
+export const COSMIC_ORIGIN_YEAR: Record<CosmicOrigin, number> = {
+  "big-bang": 5.7e-6,           // ~3 minutos
+  "cosmic-ray-spallation": 2e8, // após primeiras estrelas iluminarem o cosmos
+  "stellar-fusion-low": 2e8,    // primeiras estrelas baixa massa
+  "stellar-fusion-high": 2e8,   // primeiras estrelas massivas
+  "supernova": 2.1e8,           // primeiras massivas morrem (~1-10 Myr)
+  "neutron-star-merger": 5e8,   // precisa de remanescentes binários
+  "white-dwarf-explosion": 1e9, // anãs brancas levam mais tempo a explodir
+  "human-made": 1.38e10,        // ~1942 (Projeto Manhattan)
+};
+
+export const UNIVERSE_AGE_YEARS = 1.38e10;
+
+/** Formata uma idade cósmica (anos desde o Big Bang) em texto legível PT/EN. */
+export function formatCosmicAge(years: number, locale: "pt" | "en" = "pt"): string {
+  const ptUnits = {
+    minutes: "minutos",
+    millions: "milhões de anos",
+    billions: "bilhões de anos",
+  };
+  const enUnits = {
+    minutes: "minutes",
+    millions: "million years",
+    billions: "billion years",
+  };
+  const u = locale === "en" ? enUnits : ptUnits;
+
+  if (years < 1) {
+    const m = Math.round(years * 525600);
+    return `${m} ${u.minutes}`;
+  }
+  if (years < 1e9) {
+    return `${(years / 1e6).toFixed(0)} ${u.millions}`;
+  }
+  return `${(years / 1e9).toFixed(2)} ${u.billions}`;
+}

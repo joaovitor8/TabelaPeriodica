@@ -32,6 +32,7 @@ export const period1and2: ChemicalElement[] = [
     naturalSourcesEn: ["stellar atmospheres", "water", "hydrocarbons", "interstellar gas"],
     discoveryYear: 1766,
     discoveredBy: "Henry Cavendish",
+    spectralLines: [410.2, 434.0, 486.1, 656.3],
   },
   {
     number: 2,
@@ -62,6 +63,7 @@ export const period1and2: ChemicalElement[] = [
     naturalSourcesEn: ["natural gas wells", "solar atmosphere", "alpha decay of radioactive elements"],
     discoveryYear: 1868,
     discoveredBy: "Jules Janssen & Norman Lockyer",
+    spectralLines: [388.9, 447.1, 501.6, 587.6, 667.8],
   },
   {
     number: 3,
@@ -94,6 +96,10 @@ export const period1and2: ChemicalElement[] = [
     naturalSourcesEn: ["salar brines", "pegmatites", "seawater"],
     discoveryYear: 1817,
     discoveredBy: "Johan August Arfwedson",
+    flameColor: "#DC143C",
+    flameColorName: "vermelho carmim",
+    flameColorNameEn: "crimson red",
+    spectralLines: [610.4, 670.8],
   },
   {
     number: 4,
@@ -162,6 +168,10 @@ export const period1and2: ChemicalElement[] = [
     naturalSourcesEn: ["borax", "kernite", "evaporite deposits"],
     discoveryYear: 1808,
     discoveredBy: "Humphry Davy & Joseph Louis Gay-Lussac",
+    flameColor: "#7FFF00",
+    flameColorName: "verde brilhante",
+    flameColorNameEn: "bright green",
+    spectralLines: [518.0, 543.5, 563.1],
   },
   {
     number: 6,
@@ -320,5 +330,6 @@ export const period1and2: ChemicalElement[] = [
     naturalSourcesEn: ["atmosphere (trace)", "by-product of air liquefaction"],
     discoveryYear: 1898,
     discoveredBy: "William Ramsay & Morris Travers",
+    spectralLines: [540.1, 585.2, 614.3, 640.2, 692.9, 703.2],
   },
 ];

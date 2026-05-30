@@ -1,24 +1,29 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Droplet, ExternalLink, Heart, Mountain, Sparkles, Wind, X, type LucideIcon } from "lucide-react";
+import { ChevronLeft, ChevronRight, Droplet, ExternalLink, Heart, Mountain, Pin, PinOff, Sparkles, Wind, X, type LucideIcon } from "lucide-react";
 
-import { type AbundanceProfile, type ChemicalElement } from "@/src/data/elementsData";
+import { type AbundanceProfile, type ChemicalElement, elementByZ } from "@/src/data/elementsData";
 
 import { categoryAccent } from "@/src/utils/tableConstants";
 import { COSMIC_ICON } from "@/src/utils/cosmicMeta";
 import { BIOLOGY_ICON, BIOLOGY_TINT } from "@/src/utils/bioMeta";
 import { pickLocale, useLocale, type DictKey } from "@/src/lib/i18n";
 import { useElementDetails } from "@/src/hooks/useElementDetails";
+import { usePinned } from "@/src/hooks/usePinned";
 
 import { HudPanel } from "./hub/HudPanel";
 import { TelemetrySpinner } from "./hub/TelemetrySpinner";
 import { CommsFailure } from "./hub/CommsFailure";
+import { FlamePreview } from "./FlamePreview";
+import { SpectrumBar } from "./SpectrumBar";
+import { ElementSoundButton } from "./ElementSoundButton";
 
 interface ElementModalProps {
   selected: ChemicalElement | null;
   onClose: () => void;
+  onNavigate?: (delta: number) => void;
 }
 
 /** Normaliza ppm para 0..1 numa escala logarítmica. Total = 10^6 ppm = 100%. */
@@ -40,8 +45,26 @@ function formatPpm(ppm: number | null | undefined): string {
   return `${ppm.toExponential(1)} ppm`;
 }
 
-export function ElementModal({ selected, onClose }: ElementModalProps) {
+export function ElementModal({ selected, onClose, onNavigate }: ElementModalProps) {
   const { t, locale } = useLocale();
+  const { isPinned, isFull, toggle } = usePinned();
+
+  useEffect(() => {
+    if (!selected || !onNavigate) return;
+    function onKey(e: KeyboardEvent) {
+      const tag = (e.target as HTMLElement | null)?.tagName;
+      if (tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT") return;
+      if (e.key === "ArrowRight") {
+        e.preventDefault();
+        onNavigate?.(1);
+      } else if (e.key === "ArrowLeft") {
+        e.preventDefault();
+        onNavigate?.(-1);
+      }
+    }
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [selected, onNavigate]);
 
   if (!selected) return null;
 
@@ -49,6 +72,12 @@ export function ElementModal({ selected, onClose }: ElementModalProps) {
   const codename = `EL-${selected.number.toString().padStart(3, "0")}`;
   const name = pickLocale(selected.name, selected.nameEn, locale);
   const summary = pickLocale(selected.summary, selected.summaryEn, locale);
+  const pinned = isPinned(selected.number);
+  const pinDisabled = !pinned && isFull;
+  const pinLabel = pinned ? t("compare.unpin") : pinDisabled ? t("compare.full") : t("compare.pin");
+  const PinIcon = pinned ? PinOff : Pin;
+  const hasPrev = Boolean(elementByZ(selected.number - 1));
+  const hasNext = Boolean(elementByZ(selected.number + 1));
 
   return (
     <AnimatePresence>
@@ -68,6 +97,26 @@ export function ElementModal({ selected, onClose }: ElementModalProps) {
           className="relative w-full max-w-5xl my-8 rounded-2xl border border-white/10 bg-(--card)/90 backdrop-blur-2xl shadow-2xl"
           onClick={(e) => e.stopPropagation()}
         >
+          {onNavigate && hasPrev && (
+            <button
+              onClick={() => onNavigate(-1)}
+              title={t("modal.prev")}
+              aria-label={t("modal.prev")}
+              className="hidden md:flex absolute left-0 top-1/2 -translate-y-1/2 -translate-x-full pr-3 pl-1 h-16 items-center text-white/40 hover:text-(--cat-accent) transition-colors"
+            >
+              <ChevronLeft className="w-6 h-6" />
+            </button>
+          )}
+          {onNavigate && hasNext && (
+            <button
+              onClick={() => onNavigate(1)}
+              title={t("modal.next")}
+              aria-label={t("modal.next")}
+              className="hidden md:flex absolute right-0 top-1/2 -translate-y-1/2 translate-x-full pl-3 pr-1 h-16 items-center text-white/40 hover:text-(--cat-accent) transition-colors"
+            >
+              <ChevronRight className="w-6 h-6" />
+            </button>
+          )}
           {/* Header strip */}
           <div className="flex items-start justify-between p-5 sm:p-6 border-b border-white/6">
             <div className="flex flex-col gap-1">
@@ -91,13 +140,32 @@ export function ElementModal({ selected, onClose }: ElementModalProps) {
                 {t(`category.${selected.category}` as DictKey)}
               </span>
             </div>
-            <button
-              onClick={onClose}
-              className="text-white/50 hover:text-white transition-colors p-1"
-              aria-label={t("modal.close")}
-            >
-              <X className="w-5 h-5" />
-            </button>
+            <div className="flex items-center gap-2">
+              <ElementSoundButton element={selected} accent={accent} />
+              <button
+                onClick={() => toggle(selected)}
+                disabled={pinDisabled}
+                title={pinLabel}
+                aria-label={pinLabel}
+                className={`p-2 rounded-full transition-all ${
+                  pinDisabled
+                    ? "text-white/20 cursor-not-allowed"
+                    : pinned
+                    ? "text-(--cat-accent) bg-(--cat-accent)/15"
+                    : "text-white/50 hover:text-white hover:bg-white/8"
+                }`}
+                style={pinned ? { color: accent, background: `color-mix(in oklch, ${accent} 15%, transparent)` } : undefined}
+              >
+                <PinIcon className="w-4 h-4" />
+              </button>
+              <button
+                onClick={onClose}
+                className="text-white/50 hover:text-white transition-colors p-1"
+                aria-label={t("modal.close")}
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
           </div>
 
           {/* Body */}
@@ -147,6 +215,7 @@ export function ElementModal({ selected, onClose }: ElementModalProps) {
             <div className="flex flex-col gap-4">
               <CosmicOriginPanel element={selected} />
               <AbundancePanel abundance={selected.abundance} t={t} />
+              <SpectralSignaturePanel element={selected} locale={locale} t={t} />
               <BiologyPanel element={selected} locale={locale} t={t} />
             </div>
           </div>
@@ -353,6 +422,59 @@ interface BiologyPanelProps {
   element: ChemicalElement;
   locale: "pt" | "en";
   t: (k: DictKey) => string;
+}
+
+interface SpectralPanelProps {
+  element: ChemicalElement;
+  locale: "pt" | "en";
+  t: (k: DictKey) => string;
+}
+
+function SpectralSignaturePanel({ element, locale, t }: SpectralPanelProps) {
+  const hasFlame = Boolean(element.flameColor);
+  const hasLines = Boolean(element.spectralLines && element.spectralLines.length > 0);
+  if (!hasFlame && !hasLines) return null;
+
+  const flameName = pickLocale(
+    element.flameColorName ?? "",
+    element.flameColorNameEn,
+    locale,
+  );
+
+  return (
+    <HudPanel label={t("spectrum.panel")}>
+      <div className="flex flex-col gap-4">
+        {hasFlame && element.flameColor && (
+          <div className="flex items-start gap-4">
+            <FlamePreview color={element.flameColor} size={88} />
+            <div className="flex flex-col gap-1 min-w-0 flex-1">
+              <span
+                className="font-mono text-[10px] tracking-[0.25em] uppercase"
+                style={{ color: element.flameColor }}
+              >
+                {t("spectrum.flameLabel")}
+              </span>
+              {flameName && (
+                <p className="text-sm text-(--foreground)/85 leading-relaxed">{flameName}</p>
+              )}
+              <p className="text-[11px] text-(--muted-foreground)/70 leading-relaxed">
+                {t("spectrum.flameHint")}
+              </p>
+            </div>
+          </div>
+        )}
+
+        {hasLines && element.spectralLines && (
+          <div className="flex flex-col gap-2">
+            <span className="font-mono text-[10px] tracking-[0.25em] uppercase text-(--muted-foreground)/70">
+              {t("spectrum.linesLabel")}
+            </span>
+            <SpectrumBar lines={element.spectralLines} />
+          </div>
+        )}
+      </div>
+    </HudPanel>
+  );
 }
 
 function BiologyPanel({ element, locale, t }: BiologyPanelProps) {

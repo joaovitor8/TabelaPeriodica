@@ -23,9 +23,14 @@ const STORAGE_KEY = "tabela.locale";
 export const dict = {
   /* Header / Nav */
   "nav.back": { pt: "Voltar ao Universe", en: "Back to Universe" },
+  "nav.backShort": { pt: "Universe", en: "Universe" },
   "nav.brand": { pt: "Forja Estelar", en: "Stellar Forge" },
   "nav.brandSub": { pt: "STELLAR · FORGE", en: "STELLAR · FORGE" },
   "nav.menu": { pt: "Alternar menu", en: "Toggle menu" },
+
+  /* Códigos HUD (codenames cosméticos, mantidos em inglês nas duas locales) */
+  "table.range": { pt: "EL-001 → EL-118", en: "EL-001 → EL-118" },
+  "compare.codename": { pt: "Δ CROSS-REFERENCE", en: "Δ CROSS-REFERENCE" },
 
   /* Footer */
   "footer.tagline": {
@@ -95,6 +100,8 @@ export const dict = {
   "modal.loading": { pt: "Buscando telemetria", en: "Fetching telemetry" },
   "modal.error": { pt: "Sinal perdido", en: "Signal lost" },
   "modal.close": { pt: "Fechar", en: "Close" },
+  "modal.prev": { pt: "Elemento anterior (←)", en: "Previous element (←)" },
+  "modal.next": { pt: "Próximo elemento (→)", en: "Next element (→)" },
 
   /* Timeline cósmica */
   "timeline.title": { pt: "Linha do Tempo Cósmica", en: "Cosmic Timeline" },
@@ -114,6 +121,73 @@ export const dict = {
   /* Comuns */
   "common.retry": { pt: "Tentar de novo", en: "Try again" },
   "common.unknown": { pt: "—", en: "—" },
+
+  /* Command palette */
+  "palette.openHint": { pt: "Buscar", en: "Search" },
+  "palette.placeholder": {
+    pt: "Buscar por símbolo, nome ou número…",
+    en: "Search by symbol, name or number…",
+  },
+  "palette.empty": { pt: "Nenhum elemento encontrado.", en: "No elements found." },
+  "palette.hint": {
+    pt: "↑↓ navegar · ↵ abrir · Esc fechar",
+    en: "↑↓ navigate · ↵ open · Esc to close",
+  },
+
+  /* Elemento do dia */
+  "eod.label": { pt: "Elemento do dia", en: "Element of the day" },
+
+  /* Modo comparação */
+  "compare.pin": { pt: "Fixar para comparar", en: "Pin to compare" },
+  "compare.unpin": { pt: "Remover dos fixados", en: "Remove from pinned" },
+  "compare.full": { pt: "Máximo 4 elementos", en: "Maximum 4 elements" },
+  "compare.title": { pt: "Comparar Elementos", en: "Compare Elements" },
+  "compare.open": { pt: "Comparar", en: "Compare" },
+  "compare.clear": { pt: "Limpar", en: "Clear" },
+  "compare.dockHint": { pt: "Fixados", en: "Pinned" },
+  "compare.empty": {
+    pt: "Fixe elementos pelo modal pra comparar lado a lado.",
+    en: "Pin elements from the modal to compare side by side.",
+  },
+
+  /* Stardust mode */
+  "stardust.button": { pt: "Poeira de Estrelas", en: "Stardust" },
+  "stardust.title": { pt: "Você é poeira de estrelas", en: "You are stardust" },
+  "stardust.lead": {
+    pt: "Quase tudo no seu corpo nasceu dentro de estrelas que morreram antes do Sol existir. Estes são os elementos que te compõem — tingidos pela origem cósmica de cada um.",
+    en: "Almost everything in your body was forged inside stars that died before the Sun existed. These are the elements that make you up — tinted by their cosmic origin.",
+  },
+  "stardust.enter": { pt: "Ver o cosmos em mim", en: "See the cosmos in me" },
+  "stardust.exit": { pt: "Sair do modo", en: "Exit mode" },
+  "stardust.active": { pt: "Modo Poeira de Estrelas ativo", en: "Stardust mode active" },
+
+  /* Espectro / Chama */
+  "spectrum.panel": { pt: "Assinatura Espectral", en: "Spectral Signature" },
+  "spectrum.flameLabel": { pt: "Cor de chama", en: "Flame color" },
+  "spectrum.flameHint": {
+    pt: "Cor emitida quando o elemento é aquecido em uma chama — usado em testes analíticos clássicos.",
+    en: "Color emitted when the element is heated in a flame — used in classical analytical tests.",
+  },
+  "spectrum.linesLabel": { pt: "Linhas de emissão (nm)", en: "Emission lines (nm)" },
+
+  /* Timeline player */
+  "timeline.play": { pt: "Reproduzir nucleossíntese", en: "Play nucleosynthesis" },
+  "timeline.pause": { pt: "Pausar", en: "Pause" },
+  "timeline.reset": { pt: "Mostrar tudo", en: "Reveal all" },
+
+  /* Áudio */
+  "audio.enable": { pt: "Ativar som", en: "Enable sound" },
+  "audio.disable": { pt: "Silenciar", en: "Mute" },
+  "audio.play": { pt: "Ouvir", en: "Listen" },
+  "audio.enableToPlay": { pt: "Ative o som para ouvir o elemento", en: "Enable sound to hear the element" },
+  "audio.playSpectrum": {
+    pt: "Ouvir o espectro do elemento — cada linha de emissão vira uma frequência audível.",
+    en: "Listen to the element's spectrum — each emission line becomes an audible frequency.",
+  },
+  "audio.playZ": {
+    pt: "Tom único baseado no número atômico.",
+    en: "Single tone based on the atomic number.",
+  },
 } as const satisfies Record<string, { pt: string; en: string }>;
 
 export type DictKey = keyof typeof dict;
